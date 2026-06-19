@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KR Nghiên cứu Log – Voicebot Vietravel</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff; --ink: #1f2733; --dim: #6b7785; --faint: #9aa5b1;
+    --line: #e7ebef; --soft: #f4f6f8;
+    --plan: #2f6fed; --act: #16a374; --behind: #e05656; --doing: #e0922f;
+    --pt: #2f6fed; --td: #e0922f; --dev: #8b5cf6; --dg: #16a374;
+  }
+  body { font-family: 'Be Vietnam Pro', sans-serif; color: var(--ink); background: var(--bg); padding: 22px 18px 36px; }
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  .head { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 16px; flex-wrap: wrap; }
+  .head-l { flex: 1; min-width: 220px; }
+  .eyebrow { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--act); font-weight: 700; }
+  .title { font-size: 17px; font-weight: 700; line-height: 1.4; margin-top: 5px; }
+  .sub { font-size: 12.5px; color: var(--dim); margin-top: 6px; }
+  .sub b { color: var(--doing); font-weight: 700; }
+
+  .compare { display: flex; gap: 18px; flex-shrink: 0; }
+  .cstat { text-align: right; }
+  .cnum { font-size: 30px; font-weight: 700; line-height: 1; }
+  .cnum.plan { color: var(--plan); }
+  .cnum.act { color: var(--act); }
+  .clab { font-size: 10px; letter-spacing: .4px; text-transform: uppercase; color: var(--faint); font-weight: 600; margin-top: 4px; }
+
+  .cmp { margin-bottom: 8px; }
+  .cmpbar { position: relative; height: 12px; border-radius: 7px; background: var(--soft); }
+  .cmpbar .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--act); border-radius: 7px; }
+  .cmpbar .mk { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--plan); }
+  .cmpbar .mk::after { content: '▾'; position: absolute; top: -13px; left: 50%; transform: translateX(-50%); color: var(--plan); font-size: 11px; }
+  .delta { display: inline-block; font-size: 12px; font-weight: 700; padding: 4px 11px; border-radius: 20px; margin-top: 14px; }
+  .d-ahead { background: rgba(22,163,116,.12); color: var(--act); }
+  .d-behind { background: rgba(224,86,86,.12); color: var(--behind); }
+  .d-on { background: rgba(47,111,237,.12); color: var(--plan); }
+  .cmpleg { font-size: 11px; color: var(--faint); margin-top: 10px; display: flex; gap: 16px; flex-wrap: wrap; }
+  .cmpleg span { display: flex; gap: 5px; align-items: center; }
+  .cmpleg i { width: 11px; height: 4px; border-radius: 2px; }
+
+  .lbl { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--dim); font-weight: 700; margin: 24px 2px 9px; }
+  .lbl em { color: var(--faint); font-style: normal; font-weight: 600; text-transform: none; letter-spacing: 0; }
+
+  .weeks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .wk { border: 1px solid var(--line); border-radius: 10px; padding: 10px 11px; }
+  .wk.cur { border-color: var(--plan); background: rgba(47,111,237,.04); }
+  .wk-n { font-size: 12px; font-weight: 700; }
+  .wk-n span { color: var(--faint); font-weight: 500; font-size: 11px; }
+  .wk-cur { color: var(--plan); font-size: 9px; font-weight: 700; }
+  .wk-t { font-size: 22px; font-weight: 700; margin-top: 6px; color: var(--plan); }
+  .wk-t span { font-size: 11px; color: var(--faint); font-weight: 600; }
+  .wk-bar { height: 4px; border-radius: 3px; background: var(--soft); overflow: hidden; margin-top: 7px; }
+  .wk-bar i { display: block; height: 100%; background: var(--plan); border-radius: 3px; }
+
+  .feat { border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; overflow: hidden; }
+  .feat-h { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--soft); }
+  .feat-n { font-size: 14px; font-weight: 700; flex: 1; min-width: 0; }
+  .feat-w { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; flex-shrink: 0; background: rgba(47,111,237,.1); color: var(--plan); }
+  .badge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; flex-shrink: 0; }
+  .b-done { background: rgba(22,163,116,.12); color: var(--act); }
+  .b-doing { background: rgba(224,146,47,.14); color: var(--doing); }
+  .b-todo { background: #fff; color: var(--dim); border: 1px solid var(--line); }
+  .feat-pct { font-size: 12px; font-weight: 700; color: var(--dim); flex-shrink: 0; }
+
+  .task { display: flex; align-items: center; gap: 9px; padding: 11px 14px 4px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+  .t-code { font-size: 11px; font-weight: 700; color: var(--faint); flex-shrink: 0; }
+  .t-type { font-size: 9.5px; font-weight: 700; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+  .tt-PT { background: rgba(47,111,237,.12); color: var(--pt); }
+  .tt-TD { background: rgba(224,146,47,.14); color: var(--td); }
+  .tt-DEV { background: rgba(139,92,246,.13); color: var(--dev); }
+  .tt-DG { background: rgba(22,163,116,.12); color: var(--dg); }
+  .t-name { font-size: 13px; font-weight: 600; flex: 1; min-width: 80px; }
+  .t-name.done { text-decoration: line-through; color: var(--faint); }
+  .pill { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; flex-shrink: 0; border: 1px solid transparent; }
+  .st-todo { color: var(--dim); background: #fff; border-color: var(--line); }
+  .st-doing { color: var(--doing); background: rgba(224,146,47,.10); border-color: rgba(224,146,47,.3); }
+  .st-done { color: var(--act); background: rgba(22,163,116,.10); border-color: rgba(22,163,116,.3); }
+  .t-pct { font-size: 11.5px; font-weight: 700; min-width: 48px; text-align: right; flex-shrink: 0; color: var(--faint); }
+  .t-pct.doing { color: var(--doing); }
+  .t-pct.done { color: var(--act); }
+  .t-out { padding: 0 14px 10px 14px; font-size: 11.5px; color: var(--dim); }
+  .t-out .o { display: block; background: var(--soft); border: 1px solid var(--line); border-radius: 7px; padding: 7px 10px; }
+  .t-out .o b { color: var(--ink); font-weight: 700; }
+  .dates { padding: 0 14px 10px 14px; font-size: 11px; color: var(--faint); display: flex; gap: 16px; flex-wrap: wrap; }
+  .dates b { font-weight: 700; }
+  .dates .est b { color: var(--plan); }
+  .dates .act b { color: var(--act); }
+
+  .wait { padding: 10px 14px; border-top: 1px solid var(--line); font-size: 12px; }
+  .wait .w { display: block; background: rgba(139,92,246,.06); border: 1px solid rgba(139,92,246,.2); border-radius: 7px; padding: 7px 10px; color: var(--dev); }
+
+  .pat { padding: 11px 14px 12px; border-top: 1px solid var(--line); }
+  .pat-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .pat-name { font-size: 13px; font-weight: 700; flex: 1; min-width: 120px; }
+  .pat-nums { display: flex; gap: 6px; align-items: center; font-size: 11px; font-weight: 700; flex-wrap: wrap; }
+  .pat-nums .arrow { color: var(--faint); font-weight: 600; }
+  .nbox { padding: 3px 8px; border-radius: 6px; }
+  .n-before { color: var(--behind); background: rgba(224,86,86,.1); }
+  .n-target { color: var(--plan); background: rgba(47,111,237,.1); }
+  .n-after { color: var(--act); background: rgba(22,163,116,.1); }
+  .n-after.none { color: var(--faint); background: var(--soft); }
+  .pat-bar { position: relative; height: 8px; border-radius: 5px; background: var(--soft); margin-top: 9px; overflow: hidden; }
+  .pat-bar i { display: block; height: 100%; background: var(--act); border-radius: 5px; }
+  .pat-cap { font-size: 11px; color: var(--faint); margin-top: 6px; }
+  .pat-cap b { color: var(--act); font-weight: 700; }
+  .pat-cap.win b { color: var(--act); }
+
+  .foot { font-size: 11px; color: var(--faint); margin-top: 16px; line-height: 1.7; }
+
+  @media (max-width: 640px) {
+    .weeks { grid-template-columns: repeat(2, 1fr); }
+    .compare { width: 100%; justify-content: flex-start; }
+    .cstat { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="root"></div>
+<script>
+  // ===== CHỈNH TAY: khung tuần + mốc CẦN ĐẠT (kế hoạch) =====
+  const WEEKS = [
+    { id: 1, name: 'Tuần 1', range: '02–08/06', end: '2026-06-08', target: 25 },
+    { id: 2, name: 'Tuần 2', range: '09–15/06', end: '2026-06-15', target: 58 },
+    { id: 3, name: 'Tuần 3', range: '16–22/06', end: '2026-06-22', target: 75 },
+    { id: 4, name: 'Tuần 4', range: '23–30/06', end: '2026-06-30', target: 100 },
+  ];
+  const DEADLINE = new Date(2026, 5, 30); // 30/06/2026
+
+  // ===== Trọng số 2 giai đoạn (chỉnh tay) =====
+  const PHASE_W = { gd1: 60, gd2: 40 };
+
+  const STATUS = {
+    todo:  { label: 'Chưa làm',  f: 0,   cls: 'st-todo' },
+    doing: { label: 'Đang làm',  f: 0.5, cls: 'st-doing' },
+    done:  { label: 'Đã xong',   f: 1,   cls: 'st-done' },
+  };
+  const TL = { PT: 'Phân tích', TD: 'Trao đổi', DEV: 'Dev', DG: 'Đo lại' };
+
+  // ===== GĐ1: tính theo TRẠNG THÁI (đạt output = Đã xong) =====
+  const GD1 = { name: 'GĐ1 — Phân tích hiện trạng & phát hiện pattern lỗi nghiêm trọng', tasks: [
+    { code:'1.1', type:'PT', name:'Xây dựng báo cáo chất lượng & phân tích sâu', status:'done', est:'', actual:'',
+      output:'<b>Báo cáo chất lượng baseline</b> (3 tuần T5): xác định & phân tích sâu 2 pattern lỗi ASR (Tên sai 19,5% · Địa danh sai 16,5%)' },
+    { code:'1.2', type:'TD', name:'Trao đổi & thống nhất phương án cải thiện với dev', status:'doing', est:'', actual:'',
+      output:'<b>Phương án cải thiện được chốt</b> + timeline dev triển khai' },
+  ] };
+
+  // ===== GĐ2: tính theo MỨC GIẢM TỶ LỆ LỖI đạt mục tiêu =====
+  // before = baseline GĐ1 (3 tuần T5) · target = mục tiêu GĐ2 · after = đo lại sau cải thiện (điền số khi có, để null nếu chưa đo)
+  const PATTERNS = [
+    { name: 'ASR Tên sai',      before: 19.5, target: 15, after: null },
+    { name: 'ASR Địa danh sai', before: 16.5, target: 12, after: null },
+  ];
+  const GD2 = { name: 'GĐ2 — Theo dõi chất lượng cải thiện sau khi chốt phương án',
+    task: { code:'2.1', type:'DG', name:'Xây dựng báo cáo chất lượng giai đoạn sau', est:'', actual:'',
+      output:'<b>Báo cáo so sánh trước/sau</b>: đo lại cùng cách như baseline, kết luận mức cải thiện 2 pattern' } };
+
+  // ===== Tính toán =====
+  const fp = function(n){ return (Math.round(n*10)/10).toString().replace('.', ','); };
+  const planTarget = function(W){ return WEEKS[W-1].target; };
+
+  const gd1Frac = function(){ let s=0; GD1.tasks.forEach(t=> s+=STATUS[t.status].f); return s/GD1.tasks.length; };
+  const gd1Contrib = function(){ return PHASE_W.gd1 * gd1Frac(); };
+  const patClosure = function(p){ if(p.after==null) return 0; return Math.max(0, Math.min(1, (p.before-p.after)/(p.before-p.target))); };
+  const gd2Frac = function(){ return PATTERNS.reduce((a,p)=>a+patClosure(p),0)/PATTERNS.length; };
+  const gd2Contrib = function(){ return PHASE_W.gd2 * gd2Frac(); };
+  const actualTotal = function(){ return Math.round(gd1Contrib()+gd2Contrib()); };
+
+  const gd1Badge = function(){
+    const all=GD1.tasks.every(t=>t.status==='done'), any=GD1.tasks.some(t=>t.status!=='todo');
+    if(all) return {c:'b-done', t:'Hoàn thành'}; if(any) return {c:'b-doing', t:'Đang làm'}; return {c:'b-todo', t:'Chưa bắt đầu'};
+  };
+  const gd2Badge = function(){
+    const measured = PATTERNS.some(p=>p.after!=null);
+    const allWin = PATTERNS.every(p=>p.after!=null && p.after<=p.target);
+    if(allWin) return {c:'b-done', t:'Đạt mục tiêu'}; if(measured) return {c:'b-doing', t:'Đang đo'}; return {c:'b-todo', t:'Chờ triển khai'};
+  };
+  const curWeek = function(){ const now=new Date(); for(const w of WEEKS){ if(now <= new Date(w.end+'T23:59:59')) return w.id; } return 4; };
+  const days = function(){ return Math.max(0, Math.ceil((DEADLINE-new Date())/864e5)); };
+
+  function render(){
+    const cur = curWeek();
+    const tgt = planTarget(cur);
+    const act = actualTotal();
+    const diff = act - tgt;
+    let dCls = 'd-on', dTxt = 'Đúng tiến độ';
+    if (diff > 0) { dCls = 'd-ahead'; dTxt = 'Vượt tiến độ +' + diff + '%'; }
+    else if (diff < 0) { dCls = 'd-behind'; dTxt = 'Chậm tiến độ ' + diff + '%'; }
+
+    const winCount = PATTERNS.filter(p=>p.after!=null && p.after<=p.target).length;
+
+    document.getElementById('root').innerHTML =
+      '<div class="head">' +
+        '<div class="head-l">' +
+          '<div class="eyebrow">Key Result · Voicebot Vietravel</div>' +
+          '<div class="title">Nghiên cứu log &amp; tối ưu lỗi ASR (Tên &amp; Địa danh) — đo chất lượng trước/sau cải thiện</div>' +
+          '<div class="sub">Còn lại <b>'+days()+' ngày</b> · đã đạt mục tiêu '+winCount+'/'+PATTERNS.length+' pattern lỗi</div>' +
+        '</div>' +
+        '<div class="compare">' +
+          '<div class="cstat"><div class="cnum plan">'+tgt+'%</div><div class="clab">Cần đạt · đến '+WEEKS[cur-1].name+'</div></div>' +
+          '<div class="cstat"><div class="cnum act">'+act+'%</div><div class="clab">Thực tế</div></div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="cmp">' +
+        '<div class="cmpbar"><i class="fill" style="width:'+act+'%"></i><span class="mk" style="left:'+tgt+'%"></span></div>' +
+        '<span class="delta '+dCls+'">'+dTxt+'</span>' +
+        '<div class="cmpleg">' +
+          '<span><i style="background:var(--act)"></i>Thực tế đã làm</span>' +
+          '<span><i style="background:var(--plan)"></i>▾ Mốc cần đạt đến hiện tại</span>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="lbl">Mốc cần đạt theo tuần <em>— kế hoạch, cố định</em></div>' +
+      '<div class="weeks">' + WEEKS.map(function(w){
+        return '<div class="wk '+(w.id===cur?'cur':'')+'">' +
+          '<div class="wk-n">'+w.name+' <span>'+w.range+'</span>'+(w.id===cur?' <span class="wk-cur">• NAY</span>':'')+'</div>' +
+          '<div class="wk-t">'+w.target+'<span>%</span></div>' +
+          '<div class="wk-bar"><i style="width:'+w.target+'%"></i></div>' +
+        '</div>'; }).join('') + '</div>' +
+
+      '<div class="lbl">Thực tế đã làm <em>— GĐ1 theo trạng thái · GĐ2 theo mức giảm lỗi</em></div>' +
+      renderGD1() + renderGD2() +
+
+      '<div class="foot">' +
+        '• Trọng số: <b style="color:var(--ink)">GĐ1 = '+PHASE_W.gd1+'%</b> (tính theo trạng thái việc · Đang làm = 50%, đạt output = 100%) · <b style="color:var(--ink)">GĐ2 = '+PHASE_W.gd2+'%</b> (tính theo mức giảm tỷ lệ lỗi đạt mục tiêu).<br>' +
+        '• GĐ2: % của mỗi pattern = phần khoảng cách đã rút từ baseline về target · chạm target = 100%.<br>' +
+        '• Loại việc: <b style="color:var(--pt)">Phân tích</b> (mình làm) · <b style="color:var(--td)">Trao đổi</b> (với dev) · <b style="color:var(--dg)">Đo lại</b>. Dev triển khai là <b style="color:var(--dev)">mốc chờ phụ thuộc</b>, không tính vào % KR.' +
+      '</div>';
+  }
+
+  function taskRow(t, contrib){
+    const st = STATUS[t.status];
+    const pctCls = t.status==='done' ? 'done' : (t.status==='doing' ? 'doing' : '');
+    const pctTxt = t.status==='todo' ? '0%' : '+'+fp(contrib*st.f)+'%';
+    return '<div class="task">' +
+        '<span class="t-code">'+t.code+'</span>' +
+        '<span class="t-type tt-'+t.type+'">'+TL[t.type]+'</span>' +
+        '<span class="t-name '+(t.status==='done'?'done':'')+'">'+t.name+'</span>' +
+        '<span class="pill '+st.cls+'">'+st.label+'</span>' +
+        '<span class="t-pct '+pctCls+'">'+pctTxt+'</span>' +
+      '</div>' +
+      '<div class="t-out"><span class="o">🎯 Output: '+t.output+'</span></div>' +
+      '<div class="dates"><span class="est">📅 Est: <b>'+(t.est||'—')+'</b></span><span class="act">✔ Thực tế: <b>'+(t.actual||'—')+'</b></span></div>';
+  }
+
+  function renderGD1(){
+    const b = gd1Badge();
+    const per = PHASE_W.gd1 / GD1.tasks.length;
+    return '<div class="feat">' +
+      '<div class="feat-h">' +
+        '<div class="feat-n">'+GD1.name+'</div>' +
+        '<span class="feat-w">'+PHASE_W.gd1+'% KR</span>' +
+        '<span class="feat-pct">'+Math.round(gd1Frac()*100)+'%</span>' +
+        '<span class="badge '+b.c+'">'+b.t+'</span>' +
+      '</div>' +
+      GD1.tasks.map(t=>taskRow(t, per)).join('') +
+    '</div>';
+  }
+
+  function renderGD2(){
+    const b = gd2Badge();
+    const t = GD2.task; const st = STATUS.todo;
+    return '<div class="feat">' +
+      '<div class="feat-h">' +
+        '<div class="feat-n">'+GD2.name+'</div>' +
+        '<span class="feat-w">'+PHASE_W.gd2+'% KR</span>' +
+        '<span class="feat-pct">'+Math.round(gd2Frac()*100)+'%</span>' +
+        '<span class="badge '+b.c+'">'+b.t+'</span>' +
+      '</div>' +
+      '<div class="wait"><span class="w">⏳ Mốc chờ phụ thuộc: Dev triển khai cải thiện (không tính vào % KR)</span></div>' +
+      '<div class="task">' +
+        '<span class="t-code">'+t.code+'</span>' +
+        '<span class="t-type tt-'+t.type+'">'+TL[t.type]+'</span>' +
+        '<span class="t-name">'+t.name+'</span>' +
+      '</div>' +
+      '<div class="t-out"><span class="o">🎯 Output: '+t.output+'</span></div>' +
+      '<div class="dates"><span class="est">📅 Est: <b>'+(t.est||'—')+'</b></span><span class="act">✔ Thực tế: <b>'+(t.actual||'—')+'</b></span></div>' +
+      PATTERNS.map(renderPat).join('') +
+    '</div>';
+  }
+
+  function renderPat(p){
+    const cl = patClosure(p);
+    const win = p.after!=null && p.after<=p.target;
+    const afterTxt = p.after==null ? '—' : fp(p.after)+'%';
+    let cap;
+    if (p.after==null) cap = 'Chưa đo · chờ triển khai & gom log giai đoạn sau';
+    else if (win) cap = '<b>✓ Đạt mục tiêu</b> (giảm '+fp(p.before-p.after)+' điểm %)';
+    else cap = 'Đã đạt <b>'+Math.round(cl*100)+'%</b> mục tiêu cải thiện · còn '+fp(p.after-p.target)+' điểm % nữa';
+    return '<div class="pat">' +
+      '<div class="pat-top">' +
+        '<span class="pat-name">'+p.name+'</span>' +
+        '<span class="pat-nums">' +
+          '<span class="nbox n-before">Trước '+fp(p.before)+'%</span>' +
+          '<span class="arrow">→</span>' +
+          '<span class="nbox n-target">Mục tiêu ≤'+fp(p.target)+'%</span>' +
+          '<span class="arrow">·</span>' +
+          '<span class="nbox n-after'+(p.after==null?' none':'')+'">Sau '+afterTxt+'</span>' +
+        '</span>' +
+      '</div>' +
+      '<div class="pat-bar"><i style="width:'+Math.round(cl*100)+'%"></i></div>' +
+      '<div class="pat-cap'+(win?' win':'')+'">'+cap+'</div>' +
+    '</div>';
+  }
+
+  render();
+</script>
+</body>
+</html>
