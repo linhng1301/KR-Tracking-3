@@ -61,6 +61,7 @@
   .feat-h { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--soft); }
   .feat-n { font-size: 14px; font-weight: 700; flex: 1; min-width: 0; }
   .feat-w { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; flex-shrink: 0; background: rgba(47,111,237,.1); color: var(--plan); }
+  .feat-wk { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; flex-shrink: 0; background: var(--soft); color: var(--dim); border: 1px solid var(--line); }
   .badge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; flex-shrink: 0; }
   .b-done { background: rgba(22,163,116,.12); color: var(--act); }
   .b-doing { background: rgba(224,146,47,.14); color: var(--doing); }
@@ -142,10 +143,10 @@
   const TL = { PT: 'Phân tích', TD: 'Trao đổi', DEV: 'Dev', DG: 'Đo lại' };
 
   // ===== GĐ1: tính theo TRẠNG THÁI (đạt output = Đã xong) =====
-  const GD1 = { name: 'GĐ1 — Phân tích hiện trạng & phát hiện pattern lỗi nghiêm trọng', tasks: [
-    { code:'1.1', type:'PT', name:'Xây dựng báo cáo chất lượng & phân tích sâu', status:'done', est:'', actual:'',
+  const GD1 = { name: 'GĐ1 — Phân tích hiện trạng & phát hiện pattern lỗi nghiêm trọng', week: 'Tuần 3', tasks: [
+    { code:'1.1', type:'PT', name:'Xây dựng báo cáo chất lượng & phân tích sâu', status:'done', est:'', actual:'19/6',
       output:'<b>Báo cáo chất lượng baseline</b> (3 tuần T5): xác định & phân tích sâu 2 pattern lỗi ASR (Tên sai 19,5% · Địa danh sai 16,5%)' },
-    { code:'1.2', type:'TD', name:'Trao đổi & thống nhất phương án cải thiện với dev', status:'doing', est:'', actual:'',
+    { code:'1.2', type:'TD', name:'Trao đổi & thống nhất phương án cải thiện với dev', status:'doing', est:'20/6', actual:'',
       output:'<b>Phương án cải thiện được chốt</b> + timeline dev triển khai' },
   ] };
 
@@ -155,7 +156,7 @@
     { name: 'ASR Tên sai',      before: 19.5, target: 15, after: null },
     { name: 'ASR Địa danh sai', before: 16.5, target: 12, after: null },
   ];
-  const GD2 = { name: 'GĐ2 — Theo dõi chất lượng cải thiện sau khi chốt phương án',
+  const GD2 = { name: 'GĐ2 — Theo dõi chất lượng cải thiện sau khi chốt phương án', week: 'Tuần 4',
     task: { code:'2.1', type:'DG', name:'Xây dựng báo cáo chất lượng giai đoạn sau', est:'', actual:'',
       output:'<b>Báo cáo so sánh trước/sau</b>: đo lại cùng cách như baseline, kết luận mức cải thiện 2 pattern' } };
 
@@ -254,6 +255,7 @@
     return '<div class="feat">' +
       '<div class="feat-h">' +
         '<div class="feat-n">'+GD1.name+'</div>' +
+        '<span class="feat-wk">'+GD1.week+'</span>' +
         '<span class="feat-w">'+PHASE_W.gd1+'% KR</span>' +
         '<span class="feat-pct">'+Math.round(gd1Frac()*100)+'%</span>' +
         '<span class="badge '+b.c+'">'+b.t+'</span>' +
@@ -268,6 +270,7 @@
     return '<div class="feat">' +
       '<div class="feat-h">' +
         '<div class="feat-n">'+GD2.name+'</div>' +
+        '<span class="feat-wk">'+GD2.week+'</span>' +
         '<span class="feat-w">'+PHASE_W.gd2+'% KR</span>' +
         '<span class="feat-pct">'+Math.round(gd2Frac()*100)+'%</span>' +
         '<span class="badge '+b.c+'">'+b.t+'</span>' +
